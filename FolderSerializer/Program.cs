@@ -22,11 +22,20 @@ namespace FolderSerializer
          }
 
          var renameTasks = Serializer.CreateRenameTasks( currDirectory, filePaths, numbersToSkip );
-         ExecuteRenameTasks( renameTasks );
+
+         if ( ExecuteRenameTasks( renameTasks ) )
+         {
+            Console.WriteLine( "Serialization Success" );
+         }
+         else
+         {
+            Console.Error.WriteLine( "Serialization Failed" );
+         }
       }
 
-      private static void ExecuteRenameTasks( List<RenameTask> renameTasks )
+      private static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
       {
+         int tasksRemainingSinceLastAttempt = -1;
          while ( renameTasks.Any() )
          {
             foreach ( var task in renameTasks )
@@ -38,7 +47,19 @@ namespace FolderSerializer
             }
             renameTasks.RemoveAll( x => x.Completed );
             renameTasks.Reverse();
+
+            int tasksRenaming = renameTasks.Count();
+            if ( tasksRemainingSinceLastAttempt == tasksRenaming )
+            {
+               return false;
+            }
+            else
+            {
+               tasksRemainingSinceLastAttempt = tasksRenaming;
+            }
          }
+
+         return true;
       }
    }
 }
