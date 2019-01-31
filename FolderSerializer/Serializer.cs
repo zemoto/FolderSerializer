@@ -2,12 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace FolderSerializer
 {
    internal static class Serializer
    {
-      public static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, IEnumerable<int> numbersToSkip )
+      public static bool SerializeFilesInDirectory( string directory, IEnumerable<int> numbersToSkip )
+      {
+         var filePaths = Directory.GetFiles( directory ).ToList();
+         filePaths.Remove( Assembly.GetExecutingAssembly().Location );
+
+         var renameTasks = CreateRenameTasks( directory, filePaths, numbersToSkip );
+
+         return ExecuteRenameTasks( renameTasks );
+      }
+
+      private static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, IEnumerable<int> numbersToSkip )
       {
          var renameTasks = new List<RenameTask>();
 
@@ -29,6 +40,35 @@ namespace FolderSerializer
          }
 
          return renameTasks;
+      }
+
+      private static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
+      {
+         int tasksRemainingSinceLastAttempt = -1;
+         while ( renameTasks.Any() )
+         {
+            foreach ( var task in renameTasks )
+            {
+               if ( !task.Execute() )
+               {
+                  break;
+               }
+            }
+            renameTasks.RemoveAll( x => x.Completed );
+            renameTasks.Reverse();
+
+            int tasksRenaming = renameTasks.Count();
+            if ( tasksRemainingSinceLastAttempt == tasksRenaming )
+            {
+               return false;
+            }
+            else
+            {
+               tasksRemainingSinceLastAttempt = tasksRenaming;
+            }
+         }
+
+         return true;
       }
    }
 }

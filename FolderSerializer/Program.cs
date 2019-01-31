@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace FolderSerializer
 {
@@ -10,29 +9,23 @@ namespace FolderSerializer
    {
       private static void Main( string[] args )
       {
-         int argsIndex = 0;
+         int index = 0;
          IEnumerable<int> numbersToSkip = null;
          var directory = Directory.GetCurrentDirectory();
-         while ( argsIndex < args.Count() - 1 )
+         while ( index < args.Count() - 1 )
          {
-            if ( args[argsIndex] == "-s" )
+            if ( args[index] == "-s" )
             {
-               numbersToSkip = args[argsIndex + 1].Split( ',' ).Select( x => int.Parse( x ) );
+               numbersToSkip = args[index + 1].Split( ',' ).Select( x => int.Parse( x ) );
             }
-            if ( args[argsIndex] == "-d" )
+            else if ( args[index] == "-d" )
             {
-               directory = args[argsIndex + 1];
+               directory = args[index + 1];
             }
-            argsIndex += 2;
+            index += 2;
          }
 
-         var filePaths = Directory.GetFiles( directory ).ToList();
-         filePaths.Remove( Assembly.GetExecutingAssembly().Location );
-         var numDigits = (int)Math.Floor( Math.Log10( filePaths.Count ) + 1 );
-
-         var renameTasks = Serializer.CreateRenameTasks( directory, filePaths, numbersToSkip );
-
-         if ( ExecuteRenameTasks( renameTasks ) )
+         if ( Serializer.SerializeFilesInDirectory( directory, numbersToSkip ) )
          {
             Console.WriteLine( "Serialization Success" );
          }
@@ -40,35 +33,6 @@ namespace FolderSerializer
          {
             Console.Error.WriteLine( "Serialization Failed" );
          }
-      }
-
-      private static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
-      {
-         int tasksRemainingSinceLastAttempt = -1;
-         while ( renameTasks.Any() )
-         {
-            foreach ( var task in renameTasks )
-            {
-               if ( !task.Execute() )
-               {
-                  break;
-               }
-            }
-            renameTasks.RemoveAll( x => x.Completed );
-            renameTasks.Reverse();
-
-            int tasksRenaming = renameTasks.Count();
-            if ( tasksRemainingSinceLastAttempt == tasksRenaming )
-            {
-               return false;
-            }
-            else
-            {
-               tasksRemainingSinceLastAttempt = tasksRenaming;
-            }
-         }
-
-         return true;
       }
    }
 }
