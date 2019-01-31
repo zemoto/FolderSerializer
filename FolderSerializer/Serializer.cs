@@ -7,7 +7,7 @@ namespace FolderSerializer
 {
    internal static class Serializer
    {
-      public static List<string> SerializeFiles( string directory, IEnumerable<string> filePaths )
+      public static List<string> SerializeFiles( string directory, IEnumerable<string> filePaths, IEnumerable<int> numbersToSkip )
       {
          var newFilePaths = new List<string>();
 
@@ -20,7 +20,12 @@ namespace FolderSerializer
             var newFileName = new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath );
             var newFilePath = Path.Combine( directory, newFileName );
             newFilePaths.Add( newFilePath );
-            index++;
+
+            do
+            {
+               index++;
+            }
+            while ( numbersToSkip?.Contains( index ) == true );
          }
 
          return newFilePaths;
