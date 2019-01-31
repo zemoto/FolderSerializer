@@ -10,18 +10,27 @@ namespace FolderSerializer
    {
       private static void Main( string[] args )
       {
-         var currDirectory = Directory.GetCurrentDirectory();
-         var filePaths = Directory.GetFiles( currDirectory ).ToList();
+         int argsIndex = 0;
+         IEnumerable<int> numbersToSkip = null;
+         var directory = Directory.GetCurrentDirectory();
+         while ( argsIndex < args.Count() - 1 )
+         {
+            if ( args[argsIndex] == "-s" )
+            {
+               numbersToSkip = args[argsIndex + 1].Split( ',' ).Select( x => int.Parse( x ) );
+            }
+            if ( args[argsIndex] == "-d" )
+            {
+               directory = args[argsIndex + 1];
+            }
+            argsIndex += 2;
+         }
+
+         var filePaths = Directory.GetFiles( directory ).ToList();
          filePaths.Remove( Assembly.GetExecutingAssembly().Location );
          var numDigits = (int)Math.Floor( Math.Log10( filePaths.Count ) + 1 );
 
-         IEnumerable<int> numbersToSkip = null;
-         if ( args.Count() == 2 && args[0] == "-s" )
-         {
-            numbersToSkip = args[1].Split( ',' ).Select( x => int.Parse( x ) );
-         }
-
-         var renameTasks = Serializer.CreateRenameTasks( currDirectory, filePaths, numbersToSkip );
+         var renameTasks = Serializer.CreateRenameTasks( directory, filePaths, numbersToSkip );
 
          if ( ExecuteRenameTasks( renameTasks ) )
          {
