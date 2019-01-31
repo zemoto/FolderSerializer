@@ -7,9 +7,9 @@ namespace FolderSerializer
 {
    internal static class Serializer
    {
-      public static List<string> SerializeFiles( string directory, IEnumerable<string> filePaths, IEnumerable<int> numbersToSkip )
+      public static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, IEnumerable<int> numbersToSkip )
       {
-         var newFilePaths = new List<string>();
+         var renameTasks = new List<RenameTask>();
 
          var numDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
 
@@ -19,7 +19,7 @@ namespace FolderSerializer
             var currNumDigits = (int)Math.Floor( Math.Log10( index ) + 1 );
             var newFileName = new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath );
             var newFilePath = Path.Combine( directory, newFileName );
-            newFilePaths.Add( newFilePath );
+            renameTasks.Add( new RenameTask( filePath, newFilePath ) );
 
             do
             {
@@ -28,7 +28,7 @@ namespace FolderSerializer
             while ( numbersToSkip?.Contains( index ) == true );
          }
 
-         return newFilePaths;
+         return renameTasks;
       }
    }
 }

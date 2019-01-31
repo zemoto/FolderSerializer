@@ -21,11 +21,23 @@ namespace FolderSerializer
             numbersToSkip = args[1].Split( ',' ).Select( x => int.Parse( x ) );
          }
 
-         var serializedFilePaths = Serializer.SerializeFiles( currDirectory, filePaths, numbersToSkip );
+         var renameTasks = Serializer.CreateRenameTasks( currDirectory, filePaths, numbersToSkip );
+         ExecuteRenameTasks( renameTasks );
+      }
 
-         for ( int i = 0; i < filePaths.Count; i++ )
+      private static void ExecuteRenameTasks( List<RenameTask> renameTasks )
+      {
+         while ( renameTasks.Any() )
          {
-            File.Move( filePaths[i], serializedFilePaths[i] );
+            foreach ( var task in renameTasks )
+            {
+               if ( !task.Execute() )
+               {
+                  break;
+               }
+            }
+            renameTasks.RemoveAll( x => x.Completed );
+            renameTasks.Reverse();
          }
       }
    }
