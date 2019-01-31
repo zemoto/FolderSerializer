@@ -14,14 +14,11 @@ namespace FolderSerializer
          filePaths.Remove( Assembly.GetExecutingAssembly().Location );
          var numDigits = (int)Math.Floor( Math.Log10( filePaths.Count ) + 1 );
 
-         int index = 1;
-         foreach( var filePath in filePaths )
+         var serializedFilePaths = Serializer.SerializeFiles( currDirectory, filePaths );
+
+         for ( int i = 0; i < filePaths.Count; i++ )
          {
-            var currNumDigits = (int)Math.Floor( Math.Log10( index ) + 1 );
-            var newFileName = new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath );
-            var newFilePath = Path.Combine( currDirectory, newFileName );
-            File.Move( filePath, newFilePath );
-            index++;
+            File.Move( filePaths[i], serializedFilePaths[i] );
          }
       }
    }
