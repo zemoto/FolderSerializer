@@ -33,7 +33,9 @@ namespace FolderSerializer
             }
 
             var currNumDigits = (int)Math.Floor( Math.Log10( index ) + 1 );
-            var newFileName = new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath );
+            var newFileName = currNumDigits < numDigits
+                              ? new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath )
+                              : index + Path.GetExtension( filePath );
             var newFilePath = Path.Combine( directory, newFileName );
             renameTasks.Add( new RenameTask( filePath, newFilePath ) );
 
