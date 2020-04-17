@@ -10,7 +10,7 @@ namespace FolderSerializer
    {
       public static bool SerializeFilesInDirectory( string directory, int startingNumber, IEnumerable<int> numbersToSkip )
       {
-         var filePaths = Directory.GetFiles( directory ).ToList();
+         var filePaths = Directory.GetFiles( directory ).OrderBy( x => Path.GetFileNameWithoutExtension( x ) ).ToList();
          filePaths.Remove( Assembly.GetExecutingAssembly().Location );
 
          var renameTasks = CreateRenameTasks( directory, filePaths, startingNumber, numbersToSkip );
