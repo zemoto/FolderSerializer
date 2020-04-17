@@ -15,7 +15,7 @@ namespace FolderSerializer
          var directory = Directory.GetCurrentDirectory();
          while ( index < args.Count() - 1 )
          {
-            if ( args[index] == "-start" )
+            if ( args[index] == "-start" || args[index] == "-s" )
             {
                startingNumber = int.Parse( args[index + 1] );
             }
@@ -23,7 +23,7 @@ namespace FolderSerializer
             {
                numbersToSkip = args[index + 1].Split( ',' ).Select( x => int.Parse( x ) );
             }
-            else if ( args[index] == "-dir" )
+            else if ( args[index] == "-directory" || args[index] == "-dir" || args[index] == "-d" )
             {
                directory = args[index + 1];
             }
