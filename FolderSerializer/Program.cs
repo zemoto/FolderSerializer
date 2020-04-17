@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace FolderSerializer
 {
@@ -11,8 +12,10 @@ namespace FolderSerializer
       {
          int index = 0;
          int startingNumber = 1;
+         int numDigits = -1;
          IEnumerable<int> numbersToSkip = null;
          var directory = Directory.GetCurrentDirectory();
+
          while ( index < args.Count() - 1 )
          {
             if ( args[index] == "-start" || args[index] == "-s" )
@@ -27,10 +30,23 @@ namespace FolderSerializer
             {
                directory = args[index + 1];
             }
+            else if ( args[index] == "-digits" )
+            {
+               numDigits = int.Parse( args[index + 1] );
+            }
+
             index += 2;
          }
 
-         if ( Serializer.SerializeFilesInDirectory( directory, startingNumber, numbersToSkip ) )
+         var filePaths = Directory.GetFiles( directory ).OrderBy( x => Path.GetFileNameWithoutExtension( x ) ).ToList();
+         filePaths.Remove( Assembly.GetExecutingAssembly().Location );
+
+         if ( numDigits == -1 )
+         {
+            numDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
+         }
+
+         if ( Serializer.SerializeFilesInDirectory( directory, filePaths, startingNumber, numDigits, numbersToSkip ) )
          {
             Console.WriteLine( "Serialization Success" );
          }

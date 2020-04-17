@@ -2,27 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace FolderSerializer
 {
    internal static class Serializer
    {
-      public static bool SerializeFilesInDirectory( string directory, int startingNumber, IEnumerable<int> numbersToSkip )
+      public static bool SerializeFilesInDirectory( string directory, List<string> filePaths, int startingNumber, int numDigits, IEnumerable<int> numbersToSkip )
       {
-         var filePaths = Directory.GetFiles( directory ).OrderBy( x => Path.GetFileNameWithoutExtension( x ) ).ToList();
-         filePaths.Remove( Assembly.GetExecutingAssembly().Location );
-
-         var renameTasks = CreateRenameTasks( directory, filePaths, startingNumber, numbersToSkip );
+         var renameTasks = CreateRenameTasks( directory, filePaths, startingNumber, numDigits, numbersToSkip );
 
          return ExecuteRenameTasks( renameTasks );
       }
 
-      private static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, int startingNumber, IEnumerable<int> numbersToSkip )
+      private static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, int startingNumber, int numDigits, IEnumerable<int> numbersToSkip )
       {
          var renameTasks = new List<RenameTask>();
 
-         var numDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
+         var desiredNumDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
+         numDigits = Math.Max( numDigits, desiredNumDigits );
 
          int index = startingNumber;
          foreach ( var filePath in filePaths )
