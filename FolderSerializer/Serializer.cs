@@ -7,14 +7,7 @@ namespace FolderSerializer
 {
    internal static class Serializer
    {
-      public static bool SerializeFilesInDirectory( string directory, List<string> filePaths, int startingNumber, int numDigits, IEnumerable<int> numbersToSkip )
-      {
-         var renameTasks = CreateRenameTasks( directory, filePaths, startingNumber, numDigits, numbersToSkip );
-
-         return ExecuteRenameTasks( renameTasks );
-      }
-
-      private static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, int startingNumber, int numDigits, IEnumerable<int> numbersToSkip )
+      public static List<RenameTask> CreateRenameTasks( string directory, IEnumerable<string> filePaths, int startingNumber, int numDigits, IEnumerable<int> numbersToSkip )
       {
          var renameTasks = new List<RenameTask>();
 
@@ -42,7 +35,7 @@ namespace FolderSerializer
          return renameTasks;
       }
 
-      private static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
+      public static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
       {
          int tasksRemainingSinceLastAttempt = -1;
          while ( renameTasks.Any() )

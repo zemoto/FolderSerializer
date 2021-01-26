@@ -4,15 +4,18 @@ namespace FolderSerializer
 {
    internal sealed class RenameTask
    {
-      private readonly string _oldFileName;
-      private readonly string _newFileName;
+      private readonly string _oldFilePath;
+      private readonly string _newFilePath;
+
+      public string OldFileName => Path.GetFileNameWithoutExtension( _oldFilePath );
+      public string NewFileName => Path.GetFileNameWithoutExtension( _newFilePath );
 
       public bool Completed { get; private set; }
 
-      public RenameTask( string oldFileName, string newFileName )
+      public RenameTask( string oldFilePath, string newFilePath )
       {
-         _oldFileName = oldFileName;
-         _newFileName = newFileName;
+         _oldFilePath = oldFilePath;
+         _newFilePath = newFilePath;
       }
 
       public bool Execute()
@@ -24,7 +27,7 @@ namespace FolderSerializer
 
          try
          {
-            File.Move( _oldFileName, _newFileName );
+            File.Move( _oldFilePath, _newFilePath );
             Completed = true;
             return true;
          }
