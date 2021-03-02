@@ -7,8 +7,8 @@ namespace FolderSerializer
       private readonly string _oldFilePath;
       private readonly string _newFilePath;
 
-      public string OldFileName => Path.GetFileNameWithoutExtension( _oldFilePath );
-      public string NewFileName => Path.GetFileNameWithoutExtension( _newFilePath );
+      public string OldFileName => Path.GetFileName( _oldFilePath );
+      public string NewFileName => Path.GetFileName( _newFilePath );
 
       public bool Completed { get; private set; }
 

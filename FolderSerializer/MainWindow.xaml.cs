@@ -1,10 +1,7 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Media;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,11 +11,11 @@ namespace FolderSerializer
 {
    internal partial class MainWindow
    {
-      public static readonly DependencyProperty NumDigitsProperty = DependencyProperty.Register( 
-         nameof( NumDigits ), 
-         typeof( int ), 
-         typeof( MainWindow ), 
-         new PropertyMetadata( 1, OnParameterChanged ) );
+      public static readonly DependencyProperty NumDigitsProperty = DependencyProperty.Register(
+         nameof( NumDigits ),
+         typeof( int ),
+         typeof( MainWindow ),
+         new PropertyMetadata( 1, OnSpecialCaseParametersChanged ) );
 
       private int _minimumNumDigits;
       public int NumDigits
@@ -31,7 +28,7 @@ namespace FolderSerializer
          nameof( StartingNumber ),
          typeof( int ),
          typeof( MainWindow ),
-         new PropertyMetadata( 1, OnParameterChanged ) );
+         new PropertyMetadata( 1, OnSpecialCaseParametersChanged ) );
       public int StartingNumber
       {
          get { return (int)GetValue( StartingNumberProperty ); }
@@ -42,79 +39,22 @@ namespace FolderSerializer
          nameof( NumbersToSkipString ),
          typeof( string ),
          typeof( MainWindow ),
-         new PropertyMetadata( string.Empty, OnParameterChanged ) );
+         new PropertyMetadata( string.Empty, OnSpecialCaseParametersChanged ) );
       public string NumbersToSkipString
       {
          get { return (string)GetValue( NumbersToSkipStringProperty ); }
          set { SetValue( NumbersToSkipStringProperty, value ); }
       }
 
-      private static void OnParameterChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
-      {
-         ( (MainWindow)d ).UpdateRenameTasks();
-      }
-      private void UpdateRenameTasks()
-      {
-         RenameTasks.Clear();
-         if ( string.IsNullOrEmpty( SelectedDirectory ) )
-         {
-            return;
-         }
-
-         var numbersToSkip = ParseNumbersToSkipString();
-         var filePaths = Directory.GetFiles( SelectedDirectory ).OrderBy( x => Path.GetFileNameWithoutExtension( x ) ).ToList();
-         var numDigits = Math.Max( _minimumNumDigits, NumDigits );
-         var renameTasks = Serializer.CreateRenameTasks( SelectedDirectory, filePaths, StartingNumber, numDigits, numbersToSkip );
-
-         foreach ( var task in renameTasks )
-         {
-            RenameTasks.Add( task );
-         }
-      }
-
-      private IEnumerable<int> ParseNumbersToSkipString()
-      {
-         var text = NumbersToSkipString;
-
-         var parsedNumbers = new List<int>();
-         if ( string.IsNullOrEmpty( text ) )
-         {
-            return parsedNumbers;
-         }
-
-         int parsedInt;
-         text = text.Trim( ',', ' ' );
-         if ( text.Contains( ',' ) )
-         {
-            foreach( var value in text.Split( ',' ) )
-            {
-               if ( int.TryParse( value, out parsedInt ) )
-               {
-                  parsedNumbers.Add( parsedInt );
-               }
-            }
-         }
-         else if ( int.TryParse( text, out parsedInt ) )
-         {
-            parsedNumbers.Add( parsedInt );
-         }
-
-         return parsedNumbers;
-      }
-
-      public static readonly DependencyProperty SelectedDirectoryProperty = DependencyProperty.Register(
-         nameof( SelectedDirectory ),
-         typeof( string ),
-         typeof( MainWindow ) );
-      public string SelectedDirectory
-      {
-         get { return (string)GetValue( SelectedDirectoryProperty ); }
-         set { SetValue( SelectedDirectoryProperty, value ); }
-      }
+      private static void OnSpecialCaseParametersChanged( DependencyObject d, DependencyPropertyChangedEventArgs e ) => ( (MainWindow)d ).UpdateRenameTasks();
 
       public ObservableCollection<RenameTask> RenameTasks { get; } = new ObservableCollection<RenameTask>();
 
-      public MainWindow() => InitializeComponent();
+      public MainWindow()
+      {
+         InitializeComponent();
+         InitializeRenameTasks();
+      }
 
       private static readonly Regex _notNumberRegex = new Regex( "[^0-9]+" );
       private void OnPreviewTextInput( object sender, TextCompositionEventArgs e )
@@ -127,10 +67,6 @@ namespace FolderSerializer
          else
          {
             e.Handled = _notNumberRegex.IsMatch( e.Text );
-            if ( e.Handled )
-            {
-               SystemSounds.Beep.Play();
-            }
          }
       }
 
@@ -140,39 +76,8 @@ namespace FolderSerializer
          textBox.Text = textBox.Text.TrimStart( '0' );
       }
 
-      private void OnSelectDirectoryButtonClicked( object sender, RoutedEventArgs e )
-      {
-         var selectFolderDialog = new CommonOpenFileDialog()
-         {
-            IsFolderPicker = true,
-            Multiselect = false,
-            InitialDirectory = Directory.GetCurrentDirectory(),
-         };
-
-         if ( selectFolderDialog.ShowDialog() == CommonFileDialogResult.Ok )
-         {
-            SelectedDirectory = selectFolderDialog.FileName;
-
-            var filePaths = Directory.GetFiles( SelectedDirectory ).ToList();
-            _minimumNumDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
-
-            if ( NumDigits < _minimumNumDigits )
-            {
-               NumDigits = _minimumNumDigits;
-            }
-            else
-            {
-               UpdateRenameTasks();
-            }
-
-            SerializeButton.IsEnabled = true;
-         }
-      }
-
       private void OnSerializeButtonClicked( object sender, RoutedEventArgs e )
       {
-         var filePaths = Directory.GetFiles( SelectedDirectory ).OrderBy( x => Path.GetFileNameWithoutExtension( x ) ).ToList();
-
          if ( Serializer.ExecuteRenameTasks( RenameTasks.ToList() ) )
          {
             MessageBox.Show( "Serialization Success" );
@@ -183,6 +88,37 @@ namespace FolderSerializer
          }
 
          UpdateRenameTasks();
+      }
+
+      private void InitializeRenameTasks()
+      {
+         var filePaths = Utils.GetFilesToSerialize( Directory.GetCurrentDirectory() );
+         _minimumNumDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
+
+         if ( NumDigits < _minimumNumDigits )
+         {
+            NumDigits = _minimumNumDigits;
+         }
+         else
+         {
+            UpdateRenameTasks();
+         }
+      }
+
+      private void UpdateRenameTasks()
+      {
+         RenameTasks.Clear();
+         var currentDirectory = Directory.GetCurrentDirectory();
+         var numbersToSkip = Utils.ParseNumbersToSkip( NumbersToSkipString );
+         var filePaths = Utils.GetFilesToSerialize( currentDirectory );
+
+         var numDigits = Math.Max( _minimumNumDigits, NumDigits );
+         var renameTasks = Serializer.CreateRenameTasks( currentDirectory, filePaths, StartingNumber, numDigits, numbersToSkip );
+
+         foreach ( var task in renameTasks )
+         {
+            RenameTasks.Add( task );
+         }
       }
    }
 }

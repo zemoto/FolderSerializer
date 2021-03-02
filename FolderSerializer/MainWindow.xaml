@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         Title="Folder Serializer"
         Height="300"
-        SizeToContent="Width"
+        Width="430"
         WindowStartupLocation="CenterScreen"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
@@ -16,52 +16,49 @@
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
          <RowDefinition Height="4" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="4" />
          <RowDefinition Height="*" />
-         <RowDefinition Height="4" />
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="Auto" />
+         <ColumnDefinition Width="*" />
+         <ColumnDefinition Width="Auto" />
+         <ColumnDefinition Width="*" />
+         <ColumnDefinition Width="Auto" />
+         <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
 
-      <StackPanel Grid.Row="0"
-                  Orientation="Horizontal">
-         <TextBlock Text="Num Digits:"
-                    Margin="0,0,4,0" />
-         <TextBox Width="40"
-                  Text="{Binding NumDigits, UpdateSourceTrigger=PropertyChanged}"
-                  PreviewTextInput="OnPreviewTextInput"
-                  TextChanged="OnTextChanged" />
+      <TextBlock Grid.Row="0"
+                 Grid.Column="0"
+                 Text="Num Digits:"
+                 Margin="0,0,4,0" />
+      <TextBox Grid.Row="0"
+               Grid.Column="1"
+               Text="{Binding NumDigits, UpdateSourceTrigger=PropertyChanged}"
+               PreviewTextInput="OnPreviewTextInput"
+               TextChanged="OnTextChanged" />
 
-         <TextBlock Text="Starting Number:"
-                    Margin="8,0,4,0" />
-         <TextBox Width="40"
-                  Text="{Binding StartingNumber, UpdateSourceTrigger=PropertyChanged}"
-                  PreviewTextInput="OnPreviewTextInput"
-                  TextChanged="OnTextChanged" />
+      <TextBlock Grid.Row="0"
+                 Grid.Column="2"
+                 Text="Starting Number:"
+                 Margin="8,0,4,0" />
+      <TextBox Grid.Row="0"
+               Grid.Column="3"
+               Text="{Binding StartingNumber, UpdateSourceTrigger=PropertyChanged}"
+               PreviewTextInput="OnPreviewTextInput"
+               TextChanged="OnTextChanged" />
 
-         <TextBlock Text="Numbers to Skip:"
-                    Margin="8,0,4,0" />
-         <TextBox Width="80"
-                  Text="{Binding NumbersToSkipString, UpdateSourceTrigger=PropertyChanged}" />
-      </StackPanel>
+      <TextBlock Grid.Row="0"
+                 Grid.Column="4"
+                 Text="Numbers to Skip:"
+                 Margin="8,0,4,0" />
+      <TextBox Grid.Row="0"
+               Grid.Column="5"
+               Text="{Binding NumbersToSkipString, UpdateSourceTrigger=PropertyChanged}" />
 
-      <StackPanel Grid.Row="2"
-                  Orientation="Horizontal">
-         <TextBlock Text="Selected Directory:"
-                    Margin="0,0,4,0" />
-         <TextBox Grid.Column="0"
-                  IsReadOnly="True"
-                  Text="{Binding SelectedDirectory, Mode=OneWay}"
-                  Width="307" />
-         <Button Grid.Column="1"
-                 Width="18"
-                 Height="18"
-                 Margin="4,0,0,0"
-                 Click="OnSelectDirectoryButtonClicked" />
-      </StackPanel>
-
-      <DataGrid Grid.Row="4"
-                Width="432"
+      <DataGrid Grid.Row="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="6"
                 ItemsSource="{Binding RenameTasks}"
                 AutoGenerateColumns="False"
                 IsReadOnly="True">
@@ -76,11 +73,12 @@
       </DataGrid>
 
       <Button x:Name="SerializeButton"
-              IsEnabled="False"
-              Grid.Row="6"
+              Grid.Row="3"
+              Grid.Column="0"
+              Grid.ColumnSpan="6"
               Height="24"
               Content="Serialize"
-              Margin="0,4,0,0"
+              Margin="0,8,0,0"
               Click="OnSerializeButtonClicked" />
    </Grid>
 </Window>
