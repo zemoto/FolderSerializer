@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -22,10 +23,11 @@ namespace FolderSerializer
                index++;
             }
 
+            var indexString = index.ToString( CultureInfo.InvariantCulture );
             var currNumDigits = (int)Math.Floor( Math.Log10( index ) + 1 );
             var newFileName = currNumDigits < numDigits
-                              ? new string( '0', numDigits - currNumDigits ) + index + Path.GetExtension( filePath )
-                              : index + Path.GetExtension( filePath );
+                              ? new string( '0', numDigits - currNumDigits ) + indexString + Path.GetExtension( filePath )
+                              : indexString + Path.GetExtension( filePath );
             var newFilePath = Path.Combine( directory, newFileName );
             renameTasks.Add( new RenameTask( filePath, newFilePath ) );
 

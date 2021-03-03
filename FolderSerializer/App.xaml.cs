@@ -2,7 +2,7 @@
 
 namespace FolderSerializer
 {
-   public partial class App
+   internal partial class App
    {
       private void OnStartup( object sender, StartupEventArgs e )
       {
