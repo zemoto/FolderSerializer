@@ -72,13 +72,37 @@
          </DataGrid.Columns>
       </DataGrid>
 
-      <Button x:Name="SerializeButton"
-              Grid.Row="3"
-              Grid.Column="0"
-              Grid.ColumnSpan="6"
-              Height="24"
-              Content="Serialize"
-              Margin="0,8,0,0"
-              Click="OnSerializeButtonClicked" />
+      <Grid Grid.Row="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="6"
+            Margin="0,8,0,0">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+         </Grid.ColumnDefinitions>
+
+         <Button Grid.Column="0"
+                 Content="-"
+                 Width="24"
+                 Height="24"
+                 Click="OnRemoveShellExtensionButtonClicked"
+                 Margin="0,0,4,0"
+                 Padding="0,0,0,2" />
+
+         <Button Grid.Column="1"
+                 Content="+"
+                 Width="24"
+                 Click="OnAddShellExtensionButtonClicked"
+                 Margin="4,0"
+                 Padding="0,0,0,2" />
+
+         <Button x:Name="SerializeButton"
+                 Grid.Column="2"
+                 Height="24"
+                 Content="Serialize"
+                 Margin="4,0,0,0"
+                 Click="OnSerializeButtonClicked" />
+      </Grid>
    </Grid>
 </Window>

@@ -120,5 +120,9 @@ namespace FolderSerializer
             RenameTasks.Add( task );
          }
       }
+
+      private void OnAddShellExtensionButtonClicked( object sender, RoutedEventArgs e ) => Utils.AddShellExtension();
+
+      private void OnRemoveShellExtensionButtonClicked( object sender, RoutedEventArgs e ) => Utils.RemoveShellExtension();
    }
 }
