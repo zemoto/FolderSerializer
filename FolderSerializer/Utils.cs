@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,10 +11,7 @@ namespace FolderSerializer
       private const string ShellRegKey = @"Software\Classes\Directory\Background\shell\FolderSerializer";
       private const string ShellCommandRegKey = ShellRegKey + @"\command";
 
-      public static List<string> GetFilesToSerialize( string directory ) =>
-         Directory.EnumerateFiles( directory )
-         .Where( x => x.EndsWith( "jpg", StringComparison.InvariantCultureIgnoreCase ) || x.EndsWith( "png", StringComparison.InvariantCultureIgnoreCase ) )
-         .OrderBy( x => Path.GetFileName( x ), new FileNameComparer() ).ToList();
+      public static List<string> GetFilesToSerialize( string dir ) => Directory.EnumerateFiles( dir ).OrderBy( Path.GetFileName, new FileNameComparer() ).ToList();
 
       public static IEnumerable<int> ParseNumbersToSkip( string text )
       {
