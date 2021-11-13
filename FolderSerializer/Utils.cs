@@ -15,7 +15,7 @@ namespace FolderSerializer
       public static List<string> GetFilesToSerialize( string directory ) =>
          Directory.EnumerateFiles( directory )
          .Where( x => x.EndsWith( "jpg", StringComparison.InvariantCultureIgnoreCase ) || x.EndsWith( "png", StringComparison.InvariantCultureIgnoreCase ) )
-         .OrderBy( x => Path.GetFileName( x ), StringComparer.OrdinalIgnoreCase ).ToList();
+         .OrderBy( x => Path.GetFileName( x ), new FileNameComparer() ).ToList();
 
       public static IEnumerable<int> ParseNumbersToSkip( string text )
       {
