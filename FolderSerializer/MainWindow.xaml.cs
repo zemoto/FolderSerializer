@@ -16,12 +16,10 @@ namespace FolderSerializer
          typeof( int ),
          typeof( MainWindow ),
          new PropertyMetadata( 1, OnSpecialCaseParametersChanged ) );
-
-      private int _minimumNumDigits;
       public int NumDigits
       {
-         get { return (int)GetValue( NumDigitsProperty ); }
-         set { SetValue( NumDigitsProperty, value ); }
+         get => (int)GetValue( NumDigitsProperty );
+         set => SetValue( NumDigitsProperty, value );
       }
 
       public static readonly DependencyProperty StartingNumberProperty = DependencyProperty.Register(
@@ -31,8 +29,8 @@ namespace FolderSerializer
          new PropertyMetadata( 1, OnSpecialCaseParametersChanged ) );
       public int StartingNumber
       {
-         get { return (int)GetValue( StartingNumberProperty ); }
-         set { SetValue( StartingNumberProperty, value ); }
+         get => (int)GetValue( StartingNumberProperty );
+         set => SetValue( StartingNumberProperty, value );
       }
 
       public static readonly DependencyProperty NumbersToSkipStringProperty = DependencyProperty.Register(
@@ -42,8 +40,8 @@ namespace FolderSerializer
          new PropertyMetadata( string.Empty, OnSpecialCaseParametersChanged ) );
       public string NumbersToSkipString
       {
-         get { return (string)GetValue( NumbersToSkipStringProperty ); }
-         set { SetValue( NumbersToSkipStringProperty, value ); }
+         get => (string)GetValue( NumbersToSkipStringProperty );
+         set => SetValue( NumbersToSkipStringProperty, value );
       }
 
       private static void OnSpecialCaseParametersChanged( DependencyObject d, DependencyPropertyChangedEventArgs e ) => ( (MainWindow)d ).UpdateRenameTasks();
@@ -53,21 +51,14 @@ namespace FolderSerializer
       public MainWindow()
       {
          InitializeComponent();
-         InitializeRenameTasks();
+         UpdateRenameTasks();
       }
 
-      private static readonly Regex _notNumberRegex = new Regex( "[^0-9]+" );
+      private static readonly Regex _notNumberRegex = new( "[^0-9]+" );
       private void OnPreviewTextInput( object sender, TextCompositionEventArgs e )
       {
          var textBox = (TextBox)sender;
-         if ( textBox.SelectedText.Length == 0 && textBox.Text.Length >= 5 )
-         {
-            e.Handled = true;
-         }
-         else
-         {
-            e.Handled = _notNumberRegex.IsMatch( e.Text );
-         }
+         e.Handled = ( textBox.SelectedText.Length == 0 && textBox.Text.Length >= 5 ) || _notNumberRegex.IsMatch( e.Text );
       }
 
       private void OnTextChanged( object sender, TextChangedEventArgs e )
@@ -78,31 +69,8 @@ namespace FolderSerializer
 
       private void OnSerializeButtonClicked( object sender, RoutedEventArgs e )
       {
-         if ( Serializer.ExecuteRenameTasks( RenameTasks.ToList() ) )
-         {
-            MessageBox.Show( "Serialization Success" );
-         }
-         else
-         {
-            MessageBox.Show( "Serialization Failed" );
-         }
-
+         _ = MessageBox.Show( Serializer.ExecuteRenameTasks( RenameTasks.ToList() ) ? "Serialization Success" : "Serialization Failed" );
          UpdateRenameTasks();
-      }
-
-      private void InitializeRenameTasks()
-      {
-         var filePaths = Utils.GetFilesToSerialize( Directory.GetCurrentDirectory() );
-         _minimumNumDigits = (int)Math.Floor( Math.Log10( filePaths.Count() ) + 1 );
-
-         if ( NumDigits < _minimumNumDigits )
-         {
-            NumDigits = _minimumNumDigits;
-         }
-         else
-         {
-            UpdateRenameTasks();
-         }
       }
 
       private void UpdateRenameTasks()
@@ -112,10 +80,9 @@ namespace FolderSerializer
          var numbersToSkip = Utils.ParseNumbersToSkip( NumbersToSkipString );
          var filePaths = Utils.GetFilesToSerialize( currentDirectory );
 
-         var numDigits = Math.Max( _minimumNumDigits, NumDigits );
-         var renameTasks = Serializer.CreateRenameTasks( currentDirectory, filePaths, StartingNumber, numDigits, numbersToSkip );
-
-         foreach ( var task in renameTasks )
+         var minimumNumDigits = (int)Math.Floor( Math.Log10( filePaths.Count + StartingNumber ) + 1 );
+         var numDigits = Math.Max( minimumNumDigits, NumDigits );
+         foreach ( var task in Serializer.CreateRenameTasks( currentDirectory, filePaths, StartingNumber, numDigits, numbersToSkip ) )
          {
             RenameTasks.Add( task );
          }

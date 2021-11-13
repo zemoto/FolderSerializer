@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 
 namespace FolderSerializer
@@ -13,13 +12,10 @@ namespace FolderSerializer
       private const string ShellRegKey = @"Software\Classes\Directory\Background\shell\FolderSerializer";
       private const string ShellCommandRegKey = ShellRegKey + @"\command";
 
-      public static List<string> GetFilesToSerialize( string directory )
-      {
-         var filePaths = Directory.GetFiles( directory ).OrderBy( x => Path.GetFileName( x ), StringComparer.OrdinalIgnoreCase ).ToList();
-         filePaths.Remove( Assembly.GetExecutingAssembly().Location );
-
-         return filePaths;
-      }
+      public static List<string> GetFilesToSerialize( string directory ) =>
+         Directory.EnumerateFiles( directory )
+         .Where( x => x.EndsWith( "jpg", StringComparison.InvariantCultureIgnoreCase ) || x.EndsWith( "png", StringComparison.InvariantCultureIgnoreCase ) )
+         .OrderBy( x => Path.GetFileName( x ), StringComparer.OrdinalIgnoreCase ).ToList();
 
       public static IEnumerable<int> ParseNumbersToSkip( string text )
       {
@@ -51,41 +47,37 @@ namespace FolderSerializer
 
       public static void AddShellExtension()
       {
-         if ( RegistryKeyExists( ShellRegKey ) )
+         if ( ShellExtensionRegistered() )
          {
-            MessageBox.Show( "Already added" );
+            _ = MessageBox.Show( "Already added" );
             return;
          }
 
-         using ( var key = Registry.CurrentUser.CreateSubKey( ShellRegKey ) )
-         {
-            key.SetValue( "", "Serialize Folder" );
-            using ( var subkey = Registry.CurrentUser.CreateSubKey( ShellCommandRegKey ) )
-            {
-               subkey.SetValue( "", $"{Assembly.GetExecutingAssembly().Location} \"%V\"" );
-               MessageBox.Show( "Shell Extension added" );
-            }
-         }
+         using var key = Registry.CurrentUser.CreateSubKey( ShellRegKey );
+         key.SetValue( "", "Serialize Folder" );
+
+         using var subkey = Registry.CurrentUser.CreateSubKey( ShellCommandRegKey );
+         subkey.SetValue( "", $"{Directory.GetCurrentDirectory()}\\FolderSerializer.exe \"%V\"" );
+
+         _ = MessageBox.Show( "Shell Extension added" );
       }
 
       public static void RemoveShellExtension()
       {
-         if ( RegistryKeyExists( ShellRegKey ) )
+         if ( ShellExtensionRegistered() )
          {
             Registry.CurrentUser.DeleteSubKeyTree( ShellRegKey );
-            MessageBox.Show( "Shell Extension removed" );
+            _ = MessageBox.Show( "Shell Extension removed" );
             return;
          }
 
-         MessageBox.Show( "Already removed" );
+         _ = MessageBox.Show( "Already removed" );
       }
 
-      private static bool RegistryKeyExists( string path )
+      private static bool ShellExtensionRegistered()
       {
-         using ( var existingKey = Registry.CurrentUser.OpenSubKey( ShellRegKey, false ) )
-         {
-            return existingKey != null;
-         }
+         using var existingKey = Registry.CurrentUser.OpenSubKey( ShellRegKey, false );
+         return existingKey != null;
       }
    }
 }

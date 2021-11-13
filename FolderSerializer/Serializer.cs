@@ -40,7 +40,7 @@ namespace FolderSerializer
       public static bool ExecuteRenameTasks( List<RenameTask> renameTasks )
       {
          int tasksRemainingSinceLastAttempt = -1;
-         while ( renameTasks.Any() )
+         while ( renameTasks.Count > 0 )
          {
             foreach ( var task in renameTasks )
             {
@@ -49,18 +49,16 @@ namespace FolderSerializer
                   break;
                }
             }
-            renameTasks.RemoveAll( x => x.Completed );
+            _ = renameTasks.RemoveAll( x => x.Completed );
             renameTasks.Reverse();
 
-            int tasksRenaming = renameTasks.Count();
+            int tasksRenaming = renameTasks.Count;
             if ( tasksRemainingSinceLastAttempt == tasksRenaming )
             {
                return false;
             }
-            else
-            {
-               tasksRemainingSinceLastAttempt = tasksRenaming;
-            }
+
+            tasksRemainingSinceLastAttempt = tasksRenaming;
          }
 
          return true;
