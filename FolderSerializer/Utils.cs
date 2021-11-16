@@ -11,7 +11,12 @@ namespace FolderSerializer
       private const string ShellRegKey = @"Software\Classes\Directory\Background\shell\FolderSerializer";
       private const string ShellCommandRegKey = ShellRegKey + @"\command";
 
-      public static List<string> GetFilesToSerialize( string dir ) => Directory.EnumerateFiles( dir ).OrderBy( Path.GetFileName, new FileNameComparer() ).ToList();
+      public static List<string> GetFilesToSerialize( string dir )
+      {
+         var fileList = Directory.EnumerateFiles( dir ).OrderBy( Path.GetFileName, new FileNameComparer() ).ToList();
+         fileList.Remove( GetRunningExecutablePath() );
+         return fileList;
+      }
 
       public static IEnumerable<int> ParseNumbersToSkip( string text )
       {
@@ -53,7 +58,7 @@ namespace FolderSerializer
          key.SetValue( "", "Serialize Folder" );
 
          using var subkey = Registry.CurrentUser.CreateSubKey( ShellCommandRegKey );
-         subkey.SetValue( "", $"{Directory.GetCurrentDirectory()}\\FolderSerializer.exe \"%V\"" );
+         subkey.SetValue( "", $"{GetRunningExecutablePath()} \"%V\"" );
 
          _ = MessageBox.Show( "Shell Extension added" );
       }
@@ -75,5 +80,7 @@ namespace FolderSerializer
          using var existingKey = Registry.CurrentUser.OpenSubKey( ShellRegKey, false );
          return existingKey != null;
       }
+
+      private static string GetRunningExecutablePath() => $"{Directory.GetCurrentDirectory()}\\FolderSerializer.exe";
    }
 }
