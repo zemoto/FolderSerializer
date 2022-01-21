@@ -1,24 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace FolderSerializer
 {
    internal sealed class FileNameComparer : IComparer<string>
    {
+      [DllImport( "shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true )]
+      private static extern int StrCmpLogicalW( string x, string y );
+
       public int Compare( string a, string b )
       {
-         if ( a.Any( char.IsDigit ) && b.Any( char.IsDigit ) )
-         {
-            var intA = int.Parse( a.Where( char.IsDigit ).ToArray() );
-            var intB = int.Parse( b.Where( char.IsDigit ).ToArray() );
+         a = TrimLeadingZerosFromContiguousNumbers( a );
+         b = TrimLeadingZerosFromContiguousNumbers( b );
 
-            return intA.CompareTo( intB );
-         }
-         else
+         return StrCmpLogicalW( a, b );
+      }
+
+      private static string TrimLeadingZerosFromContiguousNumbers( string dirtyString )
+      {
+         bool numberTrimmed = false;
+         string cleanString = "";
+         for ( int i = 0; i < dirtyString.Length; i++ )
          {
-            return StringComparer.OrdinalIgnoreCase.Compare( a, b );
+            var character = dirtyString[i];
+            if ( char.IsDigit( character ) )
+            {
+               if ( !numberTrimmed )
+               {
+                  if ( character == '0' && i < dirtyString.Length - 1 && char.IsDigit( dirtyString[i + 1] ) )
+                  {
+                     continue;
+                  }
+                  else
+                  {
+                     numberTrimmed = true;
+                  }
+               }
+            }
+            else
+            {
+               numberTrimmed = false;
+            }
+
+            cleanString += character;
          }
+
+         return cleanString;
       }
    }
 }

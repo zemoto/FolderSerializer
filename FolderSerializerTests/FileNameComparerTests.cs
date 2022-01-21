@@ -10,6 +10,7 @@ namespace FolderSerializerTests
       private static readonly FileNameComparer _comparer = new FileNameComparer();
 
       [DataTestMethod]
+      [DataRow( "0", "1", -1 )]
       [DataRow( "1", "10", -1 )]
       [DataRow( "2", "10", -1 )]
       [DataRow( "pre_1", "pre_10", -1 )]
@@ -25,6 +26,7 @@ namespace FolderSerializerTests
       [DataRow( "a", "b", -1 )]
       [DataRow( "aba", "b", -1 )]
       [DataRow( "0101", "01001", -1 )]
+      [DataRow( "1 - Swnw64w", "4 - izZPDQZ", -1 )]
       public void GivenStrings_ReturnExpectedValue( string a, string b, int result ) => _comparer.Compare( a, b ).Should().Be( result );
    }
 }
